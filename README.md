@@ -2,12 +2,20 @@
 This sketch is running a web server for configuring WiFI if can't connect or for controlling of one GPIO to switch a light/LED
 
 While a WiFi config is not set or can't connect:
-  http://server_ip will give a config page with 
+
+  http://server_ip
+    -> Gives a WiFi config page 
   
 While a WiFi config is set:
-  http://server_ip/gpio -> Will display the GIPIO state and a switch form for it
-  http://server_ip/gpio?state=0 -> Will change the GPIO directly and display the above aswell
-  http://server_ip/cleareeprom -> Will reset the WiFi setting and rest to configure mode as AP
+
+  http://server_ip/gpio
+    -> Will display the GIPIO state and a switch form for it
+  
+  http://server_ip/gpio?state=0
+    -> Will change the GPIO directly and display the above aswell
+  
+  http://server_ip/cleareeprom 
+    -> Will reset the WiFi setting and rest to configure mode as AP
   
 server_ip is the IP address of the ESP8266 module, will be printed to Serial when the module is connected.
 
