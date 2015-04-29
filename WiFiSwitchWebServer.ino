@@ -18,6 +18,7 @@
 #include <ESP8266mDNS.h>
 #include <WiFiClient.h>
 #include <EEPROM.h>
+#include <Ticker.h>
 
 extern "C" {
   #include "user_interface.h" //Needed for the reset command
@@ -29,14 +30,14 @@ MDNSResponder mdns;
 // Create an instance of the server
 // specify the port to listen on as an argument
 WiFiServer server(80);
+//
+Ticker btn_timer;
 //select GPIO's
-const int outPin = 13; //out pin
-const int inPin = 0;  // the number of the input pin (push button)
+const int outPin = 13; //output pin
+const int inPin = 0;  // input pin (push button)
 int current; //Current state of the button
 int rstNeed=0;   // Restart needed to to setup change?
-byte previous = HIGH;
-unsigned long firstTime =0;   // time when the button was first pressed 
-unsigned long secondTime =0;   // time when the button was first released 
+unsigned long count = 0;
 String st;
 
 void setup() {
@@ -45,8 +46,8 @@ void setup() {
   // prepare GPIO2
   pinMode(outPin, OUTPUT);
   pinMode(inPin, INPUT_PULLUP);
-  attachInterrupt(inPin, btn_handle, CHANGE);
-               
+//  attachInterrupt(inPin, btn_handle, CHANGE);
+  btn_timer.attach(0.05, btn_handle);
   
   // Connect to WiFi network
   initWiFi();
@@ -319,40 +320,29 @@ void loop() {
  
 }
 
+
 void btn_handle()
 {
-  
-  current = digitalRead(inPin);
-  if (current == LOW && previous == HIGH){  // if the buttons becomes press remember the time 
-    firstTime = millis();    
-    Serial.print("firstTime set to "); 
-    Serial.println(firstTime); 
-  }
-
-  if (current == HIGH && previous == LOW){  // if the buttons becomes released remember the time 
-    secondTime = millis();        
-    Serial.print("secondTime set to "); 
-    Serial.println(secondTime); 
-  }
-
-  if (current == HIGH && previous == LOW && secondTime - firstTime >=50 && secondTime - firstTime <=1000){ // when the button changed between 50 ms and 1 sec
-    Serial.print("Light is ");
-    Serial.println(digitalRead(outPin));
-    
-    Serial.print("Switching light to "); 
-    Serial.println(!digitalRead(outPin));
-    digitalWrite(outPin, !digitalRead(outPin));     
-  }
-  Serial.print("button pressed "); 
-  Serial.print(secondTime - firstTime); 
-  Serial.println(" mSec"); 
-  if (current == HIGH && previous == LOW && secondTime - firstTime >=3000 ){ // when the button changed after more than 3 sec
+  if(!digitalRead(inPin)){
+    ++count;
+  } else {
+    if (count > 1 && count < 10) { //push between 50 ms and 1 sec      
       Serial.print("button pressed "); 
-      Serial.print(secondTime - firstTime); 
+      Serial.print(count*50); 
       Serial.println(" mSec"); 
-      //ESP.reset(); 
+    
+      Serial.print("Light is ");
+      Serial.println(digitalRead(outPin));
+      
+      Serial.print("Switching light to "); 
+      Serial.println(!digitalRead(outPin));
+      digitalWrite(outPin, !digitalRead(outPin)); 
+    } else if (count > 60){ //pressed 3 secs (60*50ms)
+      Serial.print("button pressed "); 
+      Serial.print(count*50); 
+      Serial.println(" mSec. Restarting!"); 
       system_restart();
+    }
+    count=0; //reset since we are at high
   }
-  
-  previous = current;
 }
