@@ -1,8 +1,9 @@
 # ESP WiFiSwitch
 ## General info
-This sketch is running a web server for configuring WiFI if can't connect or for controlling of one GPIO to switch a light/LED
-Also it supports to change the state of the light via MQTT message and gives back the state after change.
-The push button has to switch to ground. 
+This sketch is for a WiFi enabled wall light switch with focus to reliable pushbutton switch.
+In the beginning or (if no WiFi connection) it is running a web server to configure WiFI (and MQTT if desired). The Light will be switched via GPIO2 connected to a Triac to switch a light/LED.
+The operation mode can be web server or MQTT to change the state of the light.
+The push button have to switch to ground.
 ## Button functions
 * Normal press less than 1 sec but more than 50ms-> Switch light.
 * Restart press: 3 sec -> Restart the module.
