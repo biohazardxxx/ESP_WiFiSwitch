@@ -47,13 +47,13 @@ const int restartDelay = 3; //minimal time for button press to reset in sec
 const int humanpressDelay = 50; // the delay in ms untill the press should be handled as a normal push by human. Button debouce. !!! Needs to be less than restartDelay & resetDelay!!!
 const int resetDelay = 20; //Minimal time for button press to reset all settings and boot to config mode in sec
 
+const int debug = 0; //Set to one to get more log to serial
 //##### Object instances ##### 
 MDNSResponder mdns;
 ESP8266WebServer server(80);
 WiFiClient wifiClient;
 PubSubClient mqttClient;
 Ticker btn_timer;
-Ticker iot_loop;
 
 
 //##### Flags ##### They are needed because the loop needs to continue and cant wait for long tasks!
@@ -85,8 +85,11 @@ void setup() {
   pinMode(inPin, INPUT_PULLUP);
   btn_timer.attach(0.05, btn_handle);
   loadConfig();
+  if(debug==1) Serial.println("DEBUG: loadConfig() passed");
   // Connect to WiFi network
   initWiFi();
+  if(debug==1) Serial.println("DEBUG: initWiFi() passed");
+  if(debug==1) Serial.println("DEBUG: Starting the main loop");
 }
 
 void loadConfig(){
@@ -621,19 +624,23 @@ boolean pubState(){ //Publish the current state of the light
 }
 //-------------------------------- Main loop ---------------------------
 void loop() {
+  if(debug==1) Serial.println("DEBUG: loop() begin");
   if(eepromToClear==1){
+    if(debug==1) Serial.println("DEBUG: loop() clear EEPROM flag set!");
     clearEEPROM();
     delay(1000);
     system_restart();
   }
-  
+    if(debug==1) Serial.println("DEBUG: eeprom reset check passed");  
   if (WiFi.status() == WL_CONNECTED || webtypeGlob == 1){
+    if(debug==1) Serial.println("DEBUG: loop() wifi connected & webServer ");
     if (iotMode==0 || webtypeGlob == 1){
+      if(debug==1) Serial.println("DEBUG: loop() Web mode requesthandling ");
       server.handleClient();
-      mdns.update();
-      //Serial.print("*");
+      //mdns.update(); we get problems with this.
       delay(10);
     } else if (iotMode==1 && webtypeGlob != 1){
+          if(debug==1) Serial.println("DEBUG: loop() MQTT mode requesthandling ");
           if (!connectMQTT()){
               delay(200);
           }                    
@@ -642,7 +649,9 @@ void loop() {
           }
     }
   } else{
+    if(debug==1) Serial.println("DEBUG: loop - not connected");  
     delay(1000);
-    initWiFi();
+    initWiFi(); //not sure anymore why I plased this here....
   }
+    if(debug==1) Serial.println("DEBUG: loop() end");
 }
