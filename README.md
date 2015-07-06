@@ -29,13 +29,14 @@ The push button have to switch to ground.
 ## Usage
 Your WiFi switch should be connected like this
 
-!TODO!
+![Schematic](https://raw.githubusercontent.com/biohazardxxx/ESP_WiFiSwitch/master/ElectronicDesignAutomation/Schematic.png)
+
 
 <b>For default usage you can use the pre build firmware.</b>
 
-After fresh flash please restart the module manualy (power Off & On) otherwise software restart will not work and sometimes WiFi connect does not work
+After fresh flash please restart the module manualy (power Off & On) otherwise software restart will not work and sometimes WiFi connect does not work.
 
-Open the modules page after entering config mode (Press button >20secs) via http://server_ip there you can setup to be MQTT controled or Web controled.
+Open the modules page after entering config mode (Press button >20secs if you want to enter again) via http://server_ip there you can setup to be MQTT controled or Web controled.
 
 ## Credits
 For several snippets used the credit goes to:
@@ -47,6 +48,3 @@ For several snippets used the credit goes to:
  - http://www.esp8266.com/viewforum.php?f=25
  - http://www.esp8266.com/viewtopic.php?f=29&t=2745
  - And the whole Arduino and ESP8266 comunity
-
-
-
