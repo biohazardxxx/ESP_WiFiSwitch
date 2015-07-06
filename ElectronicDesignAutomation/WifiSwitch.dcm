@@ -1,0 +1,45 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP MOC3031M
+D MOC3031M, DIP6,  Zero Cross Opto-Triac, Vdrm 250V, Ift 15mA
+K Opto-Triac Opto Triac Zero Cross
+F http://www.fairchildsemi.com/ds/MO/MOC3031M.pdf
+$ENDCMP
+#
+$CMP MOC3031S
+D MOC3031S
+K Opto-Triac Opto Triac Zero Cross
+F http://www.fairchildsemi.com/ds/MO/MOC3031M.pdf
+$ENDCMP
+#
+$CMP MOC3032M
+D MOC3032M, DIP6,  Zero Cross Opto-Triac, Vdrm 250V, Ift 10mA
+K Opto-Triac Opto Triac Zero Cross
+F http://www.fairchildsemi.com/ds/MO/MOC3031M.pdf
+$ENDCMP
+#
+$CMP MOC3033M
+D MOC3033M, DIP6,  Zero Cross Opto-Triac, Vdrm 250V, Ift 5mA
+K Opto-Triac Opto Triac Zero Cross
+F http://www.fairchildsemi.com/ds/MO/MOC3031M.pdf
+$ENDCMP
+#
+$CMP MOC3041M
+D MOC3041M, DIP6,  Zero Cross Opto-Triac, Vdrm 400V, Ift 15mA
+K Opto-Triac Opto Triac Zero Cross
+F http://www.fairchildsemi.com/ds/MO/MOC3031M.pdf
+$ENDCMP
+#
+$CMP MOC3042M
+D MOC3042M, DIP6,  Zero Cross Opto-Triac, Vdrm 400V, Ift 10mA
+K Opto-Triac Opto Triac Zero Cross
+F http://www.fairchildsemi.com/ds/MO/MOC3031M.pdf
+$ENDCMP
+#
+$CMP MOC3043M
+D MOC3043M, DIP6,  Zero Cross Opto-Triac, Vdrm 400V, Ift 5mA
+K Opto-Triac Opto Triac Zero Cross
+F http://www.fairchildsemi.com/ds/MO/MOC3031M.pdf
+$ENDCMP
+#
+#End Doc Library

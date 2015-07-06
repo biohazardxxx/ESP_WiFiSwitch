@@ -1,0 +1,66 @@
+Cmp-Mod V01 Created by Cvpcb (after 2015-mar-04 BZR unknown)-product   date = 22/04/2015 21:58:14
+
+BeginCmp
+TimeStamp = /5537CAC0;
+Reference = C1;
+ValeurCmp = AC_to_DC_convertor;
+IdModule  = WifiSwitch:AC_DC_Conv;
+EndCmp
+
+BeginCmp
+TimeStamp = /5537CFE5;
+Reference = P1;
+ValeurCmp = CONN_01X05;
+IdModule  = Pin_Headers:Pin_Header_Angled_1x05;
+EndCmp
+
+BeginCmp
+TimeStamp = /5537D049;
+Reference = P2;
+ValeurCmp = CONN_01X03;
+IdModule  = WifiSwitch:WirePad_3x-5mmDrill;
+EndCmp
+
+BeginCmp
+TimeStamp = /55380183;
+Reference = R1;
+ValeurCmp = 220R;
+IdModule  = Resistors_SMD:R_1206_HandSoldering;
+EndCmp
+
+BeginCmp
+TimeStamp = /5537CF64;
+Reference = R2;
+ValeurCmp = 10K;
+IdModule  = Resistors_SMD:R_1206_HandSoldering;
+EndCmp
+
+BeginCmp
+TimeStamp = /5537CF81;
+Reference = R3;
+ValeurCmp = 330R;
+IdModule  = Resistors_SMD:R_1206_HandSoldering;
+EndCmp
+
+BeginCmp
+TimeStamp = /553681EC;
+Reference = U1;
+ValeurCmp = ESP8266_ESP3;
+IdModule  = WifiSwitch:ESP8266-ESP-03;
+EndCmp
+
+BeginCmp
+TimeStamp = /5537C87E;
+Reference = U2;
+ValeurCmp = MOC3031S;
+IdModule  = WifiSwitch:DIP-6_SMD;
+EndCmp
+
+BeginCmp
+TimeStamp = /5537D078;
+Reference = U3;
+ValeurCmp = TRIAC;
+IdModule  = Transistors_TO-220:TO-220_Neutral123_Horizontal_LargePads;
+EndCmp
+
+EndListe
