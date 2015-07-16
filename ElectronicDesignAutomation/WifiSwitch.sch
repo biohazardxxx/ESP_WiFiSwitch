@@ -68,22 +68,11 @@ F 3 "" H 5465 2700 50  0000 L CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AC_to_DC_convertor C1
-U 1 1 5537CAC0
-P 6950 4200
-F 0 "C1" H 7050 4100 60  0000 C CNN
-F 1 "AC_to_DC_convertor" H 6950 4450 60  0000 C CNN
-F 2 "WifiSwitch:AC_DC_Conv" H 7050 4200 60  0001 C CNN
-F 3 "" H 7050 4200 60  0000 C CNN
-	1    6950 4200
-	1    0    0    -1  
-$EndComp
-$Comp
 L R R2
 U 1 1 5537CF64
 P 5500 3650
 F 0 "R2" V 5580 3650 50  0000 C CNN
-F 1 "10K" V 5500 3650 50  0000 C CNN
+F 1 "4K7" V 5500 3650 50  0000 C CNN
 F 2 "Resistors_SMD:R_1206_HandSoldering" V 5430 3650 30  0001 C CNN
 F 3 "" H 5500 3650 30  0000 C CNN
 	1    5500 3650
@@ -156,7 +145,7 @@ Wire Wire Line
 	3500 3750 3500 5250
 Connection ~ 3500 5250
 Wire Wire Line
-	4950 3450 4800 3450
+	4800 3450 5500 3450
 Wire Wire Line
 	6900 2350 6900 1900
 Wire Wire Line
@@ -170,10 +159,6 @@ Wire Wire Line
 Wire Wire Line
 	6100 3450 6100 3600
 Connection ~ 6900 3600
-Wire Wire Line
-	6100 3150 6100 2800
-Wire Wire Line
-	6100 2800 5800 2800
 Wire Wire Line
 	6400 2950 6100 2950
 Connection ~ 6100 2950
@@ -210,10 +195,6 @@ Wire Wire Line
 Wire Wire Line
 	3700 3850 3750 3850
 Wire Wire Line
-	3700 3050 3700 3850
-Wire Wire Line
-	3700 3050 5500 3050
-Wire Wire Line
 	3600 3350 3600 4550
 Wire Wire Line
 	4500 4550 4500 4400
@@ -231,11 +212,6 @@ Wire Wire Line
 	3700 3950 3700 4450
 Wire Wire Line
 	4800 3950 5200 3950
-Wire Wire Line
-	5500 3050 5500 3500
-Wire Wire Line
-	4950 3450 4950 3050
-Connection ~ 4950 3050
 Wire Wire Line
 	5500 3800 5500 4100
 Connection ~ 5500 4100
@@ -301,4 +277,24 @@ $EndComp
 Wire Wire Line
 	6100 4000 6100 4100
 Connection ~ 6100 4100
+Wire Wire Line
+	6100 2800 6100 3150
+Wire Wire Line
+	6100 2800 5800 2800
+Wire Wire Line
+	3700 3850 3700 3350
+Connection ~ 3700 3350
+Wire Wire Line
+	5500 3450 5500 3500
+$Comp
+L AC_to_DC_convertor C1
+U 1 1 5537CAC0
+P 6950 4200
+F 0 "C1" H 7050 4100 60  0000 C CNN
+F 1 "AC_to_DC_convertor" H 6950 4450 60  0000 C CNN
+F 2 "WifiSwitch:AC_DC_Conv" H 7050 4200 60  0001 C CNN
+F 3 "" H 7050 4200 60  0000 C CNN
+	1    6950 4200
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

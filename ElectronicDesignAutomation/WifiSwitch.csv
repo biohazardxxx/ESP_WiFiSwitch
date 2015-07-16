@@ -1,0 +1,10 @@
+Reference, Value, Footprint, Datasheet
+U1,ESP8266_ESP3,WifiSwitch:ESP8266-ESP-03,
+U2,MOC3031S,WifiSwitch:DIP-6_SMD,
+C1,AC_to_DC_convertor,WifiSwitch:AC_DC_Conv,
+R2,10K,Resistors_SMD:R_1206_HandSoldering,
+R3,330R,Resistors_SMD:R_1206_HandSoldering,
+P1,CONN_01X05,Pin_Headers:Pin_Header_Angled_1x05,
+P2,CONN_01X03,WifiSwitch:WirePad_3x-5mmDrill,
+U3,TRIAC,Transistors_TO-220:TO-220_Neutral123_Horizontal_LargePads,
+R1,220R,Resistors_SMD:R_1206_HandSoldering,
