@@ -9,7 +9,7 @@
  *    http://server_ip/gpio?state=0 -> Will change the GPIO directly and display the above aswell
  *    http://server_ip/cleareeprom -> Will reset the WiFi setting and rest to configure mode as AP
  *  server_ip is the IP address of the ESP8266 module, will be 
- *  printed to Serial when the module is connected.
+ *  printed to Serial when the module is connected. (most likly it will be 192.168.4.1)
  * To force AP config mode, press button 20 Secs!
  *  For several snippets used, the credit goes to:
  *  - https://github.com/esp8266
@@ -47,7 +47,7 @@ const int restartDelay = 3; //minimal time for button press to reset in sec
 const int humanpressDelay = 50; // the delay in ms untill the press should be handled as a normal push by human. Button debouce. !!! Needs to be less than restartDelay & resetDelay!!!
 const int resetDelay = 20; //Minimal time for button press to reset all settings and boot to config mode in sec
 
-const int debug = 0; //Set to one to get more log to serial
+const int debug = 0; //Set to 1 to get more log to serial
 //##### Object instances ##### 
 MDNSResponder mdns;
 ESP8266WebServer server(80);
@@ -57,7 +57,7 @@ Ticker btn_timer;
 
 
 //##### Flags ##### They are needed because the loop needs to continue and cant wait for long tasks!
-int rstNeed=0;   // Restart needed to apply settings change?
+int rstNeed=0;   // Restart needed to apply new settings
 int toPub=0; // determine if state should be published.
 int eepromToClear=0; // determine if EEPROM should be cleared.
 
@@ -66,7 +66,7 @@ int webtypeGlob;
 int current; //Current state of the button
 unsigned long count = 0; //Button press time counter
 String st; //WiFi Stations HTML list
-char buf[40]; //FOr MQTT data recieve
+char buf[40]; //For MQTT data recieve
 
 //To be read from EEPROM Config
 String esid;
@@ -114,7 +114,6 @@ void loadConfig(){
     }
   Serial.print("PASS: ");
   Serial.println(epass);  
-  
   
   //len: 1+96=97
   String eiot = "";
@@ -179,19 +178,20 @@ void initWiFi(){
           return;
       }
   }
+  Serial.println("Opening AP");
   setupAP();   
 }
 
 int testWifi(void) {
   int c = 0;
-  Serial.println("Waiting for Wifi to connect");  
+  Serial.println("Wifi test...");  
   while ( c < 30 ) {
     if (WiFi.status() == WL_CONNECTED) { return(20); } 
     delay(500);
     Serial.print(".");    
     c++;
   }
-  Serial.println("Connect timed out, opening AP");
+  Serial.println("WiFi Connect timed out");
   return(10);
 } 
 
@@ -381,6 +381,8 @@ void webHandleRoot(){
   String s;
   s = "<p>Hello from ESP8266";
   s += "</p>";
+  s += "<a href=\"/gpio\">Controle GPIO</a><br />";
+  s += "<a href=\"/cleareeprom\">Clear settings an boot into Config mode</a><br />";
   s += "\r\n\r\n";
   Serial.println("Sending 200");  
   server.send(200, "text/html", s); 
@@ -405,6 +407,8 @@ void webHandleGpio(){
     if (server.arg("state")=="1" || server.arg("state")=="0" ) {
       int state = server.arg("state").toInt();
       digitalWrite(outPin, state);
+      Serial.print("Light switched via web request to  ");      
+      Serial.println(state);      
     }
     s = "Light is now ";
     s += (digitalRead(outPin))?"on":"off";
@@ -631,7 +635,7 @@ void loop() {
     delay(1000);
     system_restart();
   }
-    if(debug==1) Serial.println("DEBUG: eeprom reset check passed");  
+  if(debug==1) Serial.println("DEBUG: eeprom reset check passed");  
   if (WiFi.status() == WL_CONNECTED || webtypeGlob == 1){
     if(debug==1) Serial.println("DEBUG: loop() wifi connected & webServer ");
     if (iotMode==0 || webtypeGlob == 1){
@@ -649,9 +653,9 @@ void loop() {
           }
     }
   } else{
-    if(debug==1) Serial.println("DEBUG: loop - not connected");  
+    if(debug==1) Serial.println("DEBUG: loop - WiFi not connected");  
     delay(1000);
-    initWiFi(); //not sure anymore why I plased this here....
+    initWiFi(); //Try to connect again
   }
     if(debug==1) Serial.println("DEBUG: loop() end");
 }
