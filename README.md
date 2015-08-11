@@ -26,12 +26,15 @@ The push button have to switch to ground.
   
 <b>server_ip</b> is the IP address of the ESP8266 module, will be printed to Serial when the module is connected.
 
-## Usage
+## Hardware setup
 Your WiFi switch should be connected like this
 
 ![Schematic](https://raw.githubusercontent.com/biohazardxxx/ESP_WiFiSwitch/master/ElectronicDesignAutomation/Schematic.png)
 
+You can reorder the working PCB here: https://oshpark.com/shared_projects/xoEZ3PnV or get it from any where else from the KiCad design files "ElectronicDesignAutomation" folder.
 
+
+## Usage
 <b>For default usage you can use the pre build firmware.</b>
 
 After fresh flash please restart the module manualy (power Off & On) otherwise software restart will not work and sometimes WiFi connect does not work.
