@@ -37,8 +37,7 @@ extern "C" {
 //***** Settings declare ********************************************************************************************************* 
 String ssid = "WiFiSwitch"; //The ssid when in AP mode
 String clientName ="WiFiSwitch"; //The MQTT ID -> MAC adress will be added to make it kind of unique
-String FQDN ="WiFiSwitch.local"; //The DNS hostname - Does not work yet?
-int iotMode=0; //IOT mode: 0 = Web control, 1 = MQTT (No const since it can change during runtime)
+String FQDN ="WiFiSwitch"; //The DNS hostname - Does not work yet?
 //select GPIO's
 const int outPin = 13; //output pin
 const int inPin = 0;  // input pin (push button)
@@ -46,14 +45,14 @@ const int inPin = 0;  // input pin (push button)
 const int restartDelay = 3; //minimal time for button press to reset in sec
 const int humanpressDelay = 50; // the delay in ms untill the press should be handled as a normal push by human. Button debouce. !!! Needs to be less than restartDelay & resetDelay!!!
 const int resetDelay = 20; //Minimal time for button press to reset all settings and boot to config mode in sec
-
+const int setupTimeOutLimit=600; //Limit for setupTimeOut to reset within setup mode after some time. usefull after power break and WiFi not ready.
 const int debug = 0; //Set to 1 to get more log to serial
-//##### Object instances ##### 
-MDNSResponder mdns;
+//##### Object instances #####
 ESP8266WebServer server(80);
 WiFiClient wifiClient;
 PubSubClient mqttClient;
 Ticker btn_timer;
+Ticker setupTimeOut_timer;
 
 
 //##### Flags ##### They are needed because the loop needs to continue and cant wait for long tasks!
@@ -62,11 +61,13 @@ int toPub=0; // determine if state should be published.
 int eepromToClear=0; // determine if EEPROM should be cleared.
 
 //##### Global vars ##### 
-int webtypeGlob;
+int iotMode=0; //IOT mode: 0 = Web control, 1 = MQTT (No const since it can change during runtime)
+int webtypeGlob; // Are we in normal(0) or AP web(1)
 int current; //Current state of the button
 unsigned long count = 0; //Button press time counter
 String st; //WiFi Stations HTML list
 char buf[40]; //For MQTT data recieve
+int setupTimeOut=0; //Counter to reset within setup mode after some time. usefull after power break and WiFi not ready.
 
 //To be read from EEPROM Config
 String esid;
@@ -86,114 +87,18 @@ void setup() {
   btn_timer.attach(0.05, btn_handle);
   loadConfig();
   if(debug==1) Serial.println("DEBUG: loadConfig() passed");
+  
+  uint8_t mac[6];
+  WiFi.macAddress(mac);
+  FQDN += "-";
+  FQDN += macToStr(mac);
+  
   // Connect to WiFi network
   initWiFi();
   if(debug==1) Serial.println("DEBUG: initWiFi() passed");
   if(debug==1) Serial.println("DEBUG: Starting the main loop");
 }
 
-void loadConfig(){
-  EEPROM.begin(512);
-  delay(10);
-  String temp="";
-  
-  //len: 32
-  //addr += EEPROM.get(addr, esid);
-  for (int i = 0; i < 32; ++i)
-    {
-      esid += char(EEPROM.read(i));
-    }
-  Serial.print("SSID: ");
-  Serial.println(esid);
-  
-  //len: 64+32=96
-  //addr += EEPROM.get(addr, epass);
-  for (int i = 32; i < 96; ++i)
-    {
-      epass += char(EEPROM.read(i));
-    }
-  Serial.print("PASS: ");
-  Serial.println(epass);  
-  
-  //len: 1+96=97
-  String eiot = "";
-  //addr += EEPROM.get(addr, iotMode);
-  for (int i = 96; i < 97; ++i)
-    {
-      eiot += char(EEPROM.read(i));
-    }
-  Serial.print("IOT Mode: ");
-  if(eiot=="1"){
-    iotMode=1;
-  }else{
-    iotMode=0;
-  }
-  Serial.println(iotMode); 
-    
-  //len: 64+97=161
-  //addr += EEPROM.get(addr, subTopic);
-  for (int i = 97; i < 161; ++i)
-    {
-      subTopic += char(EEPROM.read(i));
-    }
-  Serial.print("MQTT subscribe topic: ");
-  Serial.println(subTopic); 
-  
-  //len: 64+161=225
-  //addr += EEPROM.get(addr, pubTopic);
-  for (int i = 161; i < 225; ++i)
-    {
-      pubTopic += char(EEPROM.read(i));
-    }
-  Serial.print("MQTT publish topic: ");
-  Serial.println(pubTopic); 
-  
-  //len: 15+225=240
-  //addr += EEPROM.get(addr, mqttServer);
-  for (int i = 225; i < 240; ++i)
-    {
-      temp=EEPROM.read(i);
-      if(temp!="0") mqttServer += char(EEPROM.read(i)); // Ignore spaces
-    }
-  Serial.print("MQTT Broker IP: ");
-  Serial.println(mqttServer);     
-  EEPROM.end();
-}
-
-void initWiFi(){
-  Serial.println();
-  Serial.println();
-  Serial.println("Startup");
-  esid.trim();
-  if ( esid.length() > 1 ) {
-      // test esid 
-      WiFi.disconnect();
-      delay(100);
-      WiFi.mode(WIFI_STA);
-      Serial.print("Connecting to WiFi ");
-      Serial.println(esid);
-      WiFi.begin(esid.c_str(), epass.c_str());
-      if ( testWifi() == 20 ) { 
-          launchWeb(0);
-          return;
-      }
-  }
-  Serial.println("Opening AP");
-  setupAP();   
-}
-
-int testWifi(void) {
-  int c = 0;
-  Serial.println("Wifi test...");  
-  while ( c < 30 ) {
-    if (WiFi.status() == WL_CONNECTED) { return(20); } 
-    delay(500);
-    Serial.print(".");    
-    c++;
-  }
-  Serial.println("WiFi Connect timed out");
-  return(10);
-} 
 
 
 void launchWeb(int webtype) {
@@ -208,13 +113,13 @@ void launchWeb(int webtype) {
           server.on("/a", webHandleConfigSave);          
         } else {
           //setup DNS since we are a client in WiFi net
-          if (!mdns.begin((char*) FQDN.c_str(), WiFi.localIP())) {
+          if (!MDNS.begin((char*) FQDN.c_str())) {
             Serial.println("Error setting up MDNS responder!");
             while(1) { 
               delay(1000);
             }
           } else {
-            Serial.println("mDNS responder started");
+            Serial.println("MDNS responder started:" + FQDN);
           }          
           Serial.println(WiFi.localIP());
           server.on("/", webHandleRoot);  
@@ -245,180 +150,6 @@ void launchWeb(int webtype) {
     }
 }
 
-void webHandleConfig(){
-  IPAddress ip = WiFi.softAPIP();
-  String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-  String s;
-  
-  uint8_t mac[6];
-  WiFi.macAddress(mac);
-  clientName += "-";
-  clientName += macToStr(mac);
-  
-  s = "Configuration of " + clientName + " at ";
-  s += ipStr;
-  s += "<p>";
-  s += st;
-  s += "<form method='get' action='a'>";
-  s += "<label>SSID: </label><input name='ssid' length=32><label> Pass: </label><input name='pass' type='password' length=64></br>";
-  s += "The following is not ready yet!</br>";
-  s += "<label>IOT mode: </label><input type='radio' name='iot' value='0'> HTTP<input type='radio' name='iot' value='1' checked> MQTT</br>";
-  s += "<label>MQTT Broker IP/DNS: </label><input name='host' length=15></br>";
-  s += "<label>MQTT Publish topic: </label><input name='pubtop' length=64></br>";
-  s += "<label>MQTT Subscribe topic: </label><input name='subtop' length=64></br>";
-  s += "<input type='submit'></form></p>";
-  s += "\r\n\r\n";
-  Serial.println("Sending 200");  
-  server.send(200, "text/html", s); 
-}
-
-void webHandleConfigSave(){
-  // /a?ssid=blahhhh&pass=poooo
-  String s;
-  s = "<p>Settings saved to eeprom and reset to boot into new settings</p>\r\n\r\n";
-  server.send(200, "text/html", s); 
-  Serial.println("clearing EEPROM.");
-  clearEEPROM();
-  String qsid; 
-  qsid = server.arg("ssid");
-  qsid.replace("%2F","/");
-  Serial.println(qsid);
-  Serial.println("");
-
-  String qpass;
-  qpass = server.arg("pass");
-  qpass.replace("%2F","/");
-  Serial.println(qpass);
-  Serial.println("");
-
-  String qiot;
-  qiot = server.arg("iot");
-  Serial.println(qiot);
-  Serial.println("");
-  
-  String qsubTop;
-  qsubTop = server.arg("subtop");
-  qsubTop.replace("%2F","/");
-  Serial.println(qsubTop);
-  Serial.println("");
-  
-  String qpubTop;
-  qpubTop = server.arg("pubtop");
-  qpubTop.replace("%2F","/");
-  Serial.println(qpubTop);
-  Serial.println("");
-  
-  String qmqttip;
-  qmqttip = server.arg("host");
-  Serial.println(qmqttip);
-  Serial.println("");
-  
-  //int addr=0;
-  EEPROM.begin(512);
-  delay(10);
-  Serial.println("writing eeprom ssid.");
-  //addr += EEPROM.put(addr, qsid);
-  for (int i = 0; i < qsid.length(); ++i)
-    {
-      EEPROM.write(i, qsid[i]);
-      Serial.print(qsid[i]); 
-    }
-  Serial.println("");
-    
-  Serial.println("writing eeprom pass."); 
-  //addr += EEPROM.put(addr, qpass);
-  for (int i = 0; i < qpass.length(); ++i)
-    {
-      EEPROM.write(32+i, qpass[i]);
-      Serial.print(qpass[i]); 
-    }  
-  Serial.println("");
-    
-  Serial.println("writing eeprom iot."); 
-  //addr += EEPROM.put(addr, qiot);
-  for (int i = 0; i < qiot.length(); ++i)
-    {
-      EEPROM.write(96+i, qiot[i]);
-      Serial.print(qiot[i]); 
-    } 
-  Serial.println("");
-    
-  Serial.println("writing eeprom subTop."); 
-  //addr += EEPROM.put(addr, qsubTop);
-  for (int i = 0; i < qsubTop.length(); ++i)
-    {
-      EEPROM.write(97+i, qsubTop[i]);
-      Serial.print(qsubTop[i]); 
-    } 
-  Serial.println("");
-    
-  Serial.println("writing eeprom pubTop."); 
-  //addr += EEPROM.put(addr, qpubTop);
-  for (int i = 0; i < qpubTop.length(); ++i)
-    {
-      EEPROM.write(161+i, qpubTop[i]);
-      Serial.print(qpubTop[i]); 
-    } 
-  Serial.println("");
-    
-  Serial.println("writing eeprom MQTT IP."); 
-  //addr += EEPROM.put(addr, qmqttip);
-  for (int i = 0; i < qmqttip.length(); ++i)
-    {
-      EEPROM.write(225+i, qmqttip[i]);
-      Serial.print(qmqttip[i]); 
-    } 
-  Serial.println("");  
-  
-  EEPROM.commit();
-  delay(1000);
-  EEPROM.end();
-  Serial.println("Settings written, restarting!"); 
-  system_restart();
-}
-
-void webHandleRoot(){
-  String s;
-  s = "<p>Hello from ESP8266";
-  s += "</p>";
-  s += "<a href=\"/gpio\">Controle GPIO</a><br />";
-  s += "<a href=\"/cleareeprom\">Clear settings an boot into Config mode</a><br />";
-  s += "\r\n\r\n";
-  Serial.println("Sending 200");  
-  server.send(200, "text/html", s); 
-}
-
-void webHandleClearRom(){
-  String s;
-  s = "<p>Clearing the EEPROM and reset to configure new wifi<p>";
-  s += "</html>\r\n\r\n";
-  Serial.println("Sending 200"); 
-  server.send(200, "text/html", s); 
-  Serial.println("clearing eeprom");
-  clearEEPROM();
-  delay(10);
-  Serial.println("Done, restarting!");
-  system_restart();
-}
-
-void webHandleGpio(){
-  String s;
-   // Set GPIO according to the request
-    if (server.arg("state")=="1" || server.arg("state")=="0" ) {
-      int state = server.arg("state").toInt();
-      digitalWrite(outPin, state);
-      Serial.print("Light switched via web request to  ");      
-      Serial.println(state);      
-    }
-    s = "Light is now ";
-    s += (digitalRead(outPin))?"on":"off";
-    s += "<p>Change to <form action='gpio'><input type='radio' name='state' value='1' ";
-    s += (digitalRead(outPin))?"checked":"";
-    s += ">On<input type='radio' name='state' value='0' ";
-    s += (digitalRead(outPin))?"":"checked";
-    s += ">Off <input type='submit' value='Submit'></form></p>";   
-    server.send(200, "text/html", s);    
-}
 
 void setupAP(void) {
   
@@ -470,12 +201,20 @@ void setupAP(void) {
   //ssid += macToStr(mac);
   
   WiFi.softAP((char*) ssid.c_str());
-  WiFi.begin((char*) ssid.c_str()); // not sure if need but works
+  WiFi.begin((char*) ssid.c_str());
   Serial.print("Access point started with name ");
   Serial.println(ssid);
+  setupTimeOut_timer.attach(1,setupTimeOutCount);
   launchWeb(1);
 }
 
+void setupTimeOutCount(){
+  if(setupTimeOut>=setupTimeOutLimit){
+    system_restart();
+  } else {
+    setupTimeOut++;
+  }
+}
 void btn_handle()
 {
   if(!digitalRead(inPin)){
@@ -510,16 +249,6 @@ void btn_handle()
 }
 
 //-------------------------------- Help functions ---------------------------
-void clearEEPROM(){
-  EEPROM.begin(512);
-  // write a 0 to all 512 bytes of the EEPROM
-  for (int i = 0; i < 512; i++){
-    EEPROM.write(i, 0);    
-  }
-  delay(200);
-  EEPROM.commit(); 
-  EEPROM.end(); 
-}
 
 String macToStr(const uint8_t* mac)
 {
@@ -530,101 +259,6 @@ String macToStr(const uint8_t* mac)
       result += ':';
   }
   return result;
-}
-
-//-------------------------------- MQTT functions ---------------------------
-boolean connectMQTT(){
-  if (mqttClient.connected()){
-    return true;
-  }  
-  
-  uint8_t mac[6];
-  WiFi.macAddress(mac);
-  clientName += "-";
-  clientName += macToStr(mac);
-  
-  Serial.print("Connecting to MQTT server ");
-  Serial.print(mqttServer);
-  Serial.print(" as ");
-  Serial.println(clientName);
-  
-  if (mqttClient.connect((char*) clientName.c_str())) {
-    Serial.println("Connected to MQTT broker");
-    if(mqttClient.subscribe((char*)subTopic.c_str())){
-      Serial.println("Subsribed to topic.");
-    } else {
-      Serial.println("NOT subsribed to topic!");      
-    }
-    return true;
-  }
-  else {
-    Serial.println("MQTT connect failed! ");
-    return false;
-  }
-}
-
-void disconnectMQTT(){
-  mqttClient.disconnect();
-}
-
-void mqtt_handler(){
-  if (toPub==1){
-    if(pubState()){
-     toPub=0; 
-    }
-  }
-  mqttClient.loop();
-  delay(100); //let things happen in background
-}
-
-void mqtt_arrived(char* subTopic, byte* payload, unsigned int length) { // handle messages arrived 
-  int i = 0;
-  Serial.print("MQTT message arrived:  topic: " + String(subTopic));
-    // create character buffer with ending null terminator (string)
-  for(i=0; i<length; i++) {    
-    buf[i] = payload[i];
-  }
-  buf[i] = '\0';
-  String msgString = String(buf);
-  Serial.println(" message: " + msgString);
-  if (msgString == "1"){
-      Serial.print("Light is ");
-      Serial.println(digitalRead(outPin));      
-      Serial.print("Switching light to "); 
-      Serial.println("high");
-      digitalWrite(outPin, 1); 
-  } else if (msgString == "0"){
-      Serial.print("Light is ");
-      Serial.println(digitalRead(outPin));    
-      Serial.print("Switching light to "); 
-      Serial.println("low");
-      digitalWrite(outPin, 0); 
-  }    
-}
-
-boolean pubState(){ //Publish the current state of the light    
-  if (!connectMQTT()){
-      delay(100);
-      if (!connectMQTT){                            
-        Serial.println("Could not connect MQTT.");
-        Serial.println("Publish state NOK");
-        return false;
-      }
-    }
-    if (mqttClient.connected()){      
-      String state = (digitalRead(outPin))?"1":"0";
-        Serial.println("To publish state " + state );  
-      if (mqttClient.publish((char*) pubTopic.c_str(), (char*) state.c_str())) {
-        Serial.println("Publish state OK");        
-        return true;
-      } else {
-        Serial.println("Publish state NOK");        
-        return false;
-      }
-     } else {
-         Serial.println("Publish state NOK");
-         Serial.println("No MQTT connection.");        
-     }    
 }
 //-------------------------------- Main loop ---------------------------
 void loop() {
