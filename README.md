@@ -34,13 +34,13 @@ Your WiFi switch should be connected like this
 You can reorder the working PCB here: https://oshpark.com/shared_projects/xoEZ3PnV or get it from any where else from the KiCad design files "ElectronicDesignAutomation" folder.
 
 ## Parts list
-                        ESP8266-03 module
-AC to DC Power Module Supply Isolation Input: AC90-240V Output: 3.3V 500mA like this http://www.ebay.com/itm/271636529720?_trksid=p2060353.m2749.l2649&ssPageName=STRK%3AMEBIDX%3AIT
-Resistor 220 Ohm SMD 1206        1x
-Resistor 330 Ohm SMD 1206        1x
-Resistor 4k7 SMD 1206   1x
-Optocuppler MOC3040  SMD      1x
-Tryac BT136D     1x
+* ESP8266-03 module
+* AC to DC Power Module Supply Isolation Input: AC90-240V Output: 3.3V 500mA like this * http://www.ebay.com/itm/271636529720?_trksid=p2060353.m2749.l2649&ssPageName=STRK%3AMEBIDX%3AIT
+* Resistor 220 Ohm SMD 1206        1x
+* Resistor 330 Ohm SMD 1206        1x
+* Resistor 4k7 SMD 1206   1x
+* Optocuppler MOC3040  SMD      1x
+* Tryac BT136D     1x
 
 ## Usage
 <b>For default usage you can use the pre build firmware.</b>
