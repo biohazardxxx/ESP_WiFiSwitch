@@ -1,7 +1,8 @@
 # ESP WiFiSwitch
 ## General info
 This sketch is for a WiFi enabled wall light switch with focus to reliable pushbutton switch.
-In the beginning or (if no WiFi connection) it is running a web server to configure WiFI (and MQTT if desired). The Light will be switched via GPIO2 connected to a Triac to switch a light/LED.
+In the beginning or (if no WiFi connection) it is running a web server to configure WiFI (and MQTT if desired). 
+Each second start up switch will load into OTA mode. By this you can upload a new firmware (compiled *.bin file) via web browser. The OTA mode will end after set timeout and restart into desired mode.
 The operation mode can be web server or MQTT to change the state of the light.
 The push button have to switch to ground.
 ## Button functions
@@ -23,6 +24,10 @@ The push button have to switch to ground.
   
  * http://server_ip/cleareeprom 
   * Will reset the WiFi setting and rest to configure mode as AP
+  * 
+* While in OTA mode each second start:
+   * http://server_ip
+   *-> Gives a WiFi config page 
   
 <b>server_ip</b> is the IP address of the ESP8266 module, will be printed to Serial when the module is connected.
 
@@ -43,7 +48,7 @@ You can reorder the working PCB here: https://oshpark.com/shared_projects/xoEZ3P
 * Tryac BT136D     1x
 
 ## Usage
-<b>For default usage you can use the pre build firmware.</b>
+<b>For default usage you can use the pre build firmware and flas it with NodeMcu flasher.</b>
 
 After fresh flash please restart the module manualy (power Off & On) otherwise software restart will not work and sometimes WiFi connect does not work.
 
