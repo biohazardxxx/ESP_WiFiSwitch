@@ -139,7 +139,7 @@ void launchWeb(int webtype) {
       MDNS.addService("http", "tcp", 80);
       otaTickLoop.attach(1, otaCountown);
     } else { 
-      setOtaFlag(1); 
+      //setOtaFlag(1); 
       if (webtype==1 || iotMode==0){ //in config mode or WebControle
           if (webtype==1) {           
             webtypeGlob == 1;
@@ -250,7 +250,7 @@ void webHandleConfigSave(){
   saveConfig()? Serial.println("sucessfully.") : Serial.println("not succesfully!");;
   Serial.println("Restarting!"); 
   delay(1000);
-  system_restart();
+  ESP.reset();
 }
 
 void webHandleRoot(){
@@ -274,7 +274,7 @@ void webHandleClearRom(){
   clearConfig();
   delay(10);
   Serial.println("Done, restarting!");
-  system_restart();
+  ESP.reset();
 }
 
 void webHandleGpio(){

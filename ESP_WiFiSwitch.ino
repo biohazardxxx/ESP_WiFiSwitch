@@ -84,6 +84,7 @@ int otaCount=300; //imeout in sec for OTA mode
 int current; //Current state of the button
 unsigned long count = 0; //Button press time counter
 String st; //WiFi Stations HTML list
+String state; //State of light
 char buf[40]; //For MQTT data recieve
 char* host; //The DNS hostname
 //To be read from Config file
@@ -122,6 +123,12 @@ void setup() {
   Debugln("DEBUG: Entering initWiFi()");
   initWiFi();
   Debugln("DEBUG: initWiFi() passed");
+  Debug("iotMode:");
+  Debugln(iotMode);
+  Debug("webtypeGlob:");
+  Debugln(webtypeGlob);
+  Debug("otaFlag:");
+  Debugln(otaFlag);
   Debugln("DEBUG: Starting the main loop");
 }
 
@@ -142,17 +149,22 @@ void btn_handle()
       Serial.print("Switching light to "); 
       Serial.println(!digitalRead(OUTPIN));
       digitalWrite(OUTPIN, !digitalRead(OUTPIN)); 
-      if(iotMode==1 && mqttClient.connected()) toPub=1;
+      state = digitalRead(OUTPIN);
+      if(iotMode==1 && mqttClient.connected()){
+        toPub=1;        
+        Debugln("DEBUG: toPub set to 1");
+      }
     } else if (count > (RESTARTDELAY/0.05) && count <= (RESETDELAY/0.05)){ //pressed 3 secs (60*0.05s)
       Serial.print("button pressed "); 
       Serial.print(count*0.05); 
       Serial.println(" Sec. Restarting!"); 
-      system_restart();
+      setOtaFlag(!otaFlag);      
+      ESP.reset();
     } else if (count > (RESETDELAY/0.05)){ //pressed 20 secs
       Serial.print("button pressed "); 
       Serial.print(count*0.05); 
       Serial.println(" Sec."); 
-      Serial.println(" Clearing EEPROM and resetting!");       
+      Serial.println(" Clear settings and resetting!");       
       configToClear=1;
       }
     count=0; //reset since we are at high
@@ -168,14 +180,14 @@ void loop() {
     //Debugln("DEBUG: loop() clear config flag set!");
     clearConfig()? Serial.println("Config cleared!") : Serial.println("Config could not be cleared");
     delay(1000);
-    system_restart();
+    ESP.reset();
   }
   //Debugln("DEBUG: config reset check passed");  
   if (WiFi.status() == WL_CONNECTED && otaFlag){
     if(otaCount<=1) {
       Serial.println("OTA mode time out. Reset!"); 
       setOtaFlag(0);
-      system_restart();
+      ESP.reset();
       delay(100);
     }
     server.handleClient();
@@ -189,10 +201,13 @@ void loop() {
     } else if (iotMode==1 && webtypeGlob != 1 && otaFlag !=1){
           //Debugln("DEBUG: loop() MQTT mode requesthandling ");
           if (!connectMQTT()){
-              delay(200);
+              delay(200);          
           }                    
-          if (mqttClient.connected()){
+          if (mqttClient.connected()){            
+              //Debugln("mqtt handler");
               mqtt_handler();
+          } else {
+              Debugln("mqtt Not connected!");
           }
     }
   } else{

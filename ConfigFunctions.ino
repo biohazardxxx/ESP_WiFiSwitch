@@ -46,19 +46,19 @@ bool loadConfig() {
   mqttServer = mqttServerC;
   Serial.print("otaFlag: "); 
   Serial.println(otaFlag);
-  Serial.print("esid: "); 
+  Serial.print("esid: ");
   Serial.println(esid);
-  Serial.print("epass: "); 
+  Serial.print("epass: ");
   Serial.println(epass);
-  Serial.print("iotMode: "); 
+  Serial.print("iotMode: ");
   Serial.println(iotMode);
-  Serial.print("pubTopic: "); 
+  Serial.print("pubTopic: ");
   Serial.println(pubTopic);
-  Serial.print("subTopic: "); 
+  Serial.print("subTopic: ");
   Serial.println(subTopic);
-  Serial.print("mqttServer: "); 
+  Serial.print("mqttServer: ");
   Serial.println(mqttServer);
-  Serial.print("esid: "); 
+  Serial.print("esid: ");
   Serial.println(esid);
   return true;
 }

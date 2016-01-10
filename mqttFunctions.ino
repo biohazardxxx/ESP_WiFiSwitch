@@ -29,6 +29,7 @@ void disconnectMQTT(){
 
 void mqtt_handler(){
   if (toPub==1){
+    Debugln("DEBUG: Publishing state via MWTT");
     if(pubState()){
      toPub=0; 
     }
@@ -72,7 +73,7 @@ boolean pubState(){ //Publish the current state of the light
       }
     }
     if (mqttClient.connected()){      
-      String state = (digitalRead(OUTPIN))?"1":"0";
+        //String state = (digitalRead(OUTPIN))?"1":"0";
         Serial.println("To publish state " + state );  
       if (mqttClient.publish((char*)pubTopic.c_str(), (char*) state.c_str())) {
         Serial.println("Publish state OK");        
