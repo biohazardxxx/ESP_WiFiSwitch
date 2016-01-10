@@ -48,9 +48,11 @@ You can reorder the working PCB here: https://oshpark.com/shared_projects/xoEZ3P
 * Tryac BT136D     1x
 
 ## Usage
-<b>For default usage you can use the pre build firmware and flas it with NodeMcu flasher.</b>
+<b>For default usage you can use the pre build firmware and flash it with NodeMcu flasher.</b>
 
 After fresh flash please restart the module manualy (power Off & On) otherwise software restart will not work and sometimes WiFi connect does not work.
+
+When manually compile and flash with Arduino IDE please make sure to have this flash settings: ![fLashSetting](https://github.com/biohazardxxx/ESP_WiFiSwitch/blob/master/other/flashSettings.png)
 
 Open the modules page after entering config mode (Press button >20secs if you want to enter again) via http://server_ip there you can setup to be MQTT controled or Web controled.
 
