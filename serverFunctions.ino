@@ -164,8 +164,9 @@ void launchWeb(int webtype) {
           Serial.println("Web server started");   
           webtypeGlob=webtype; //Store global to use in loop()
         } else if(webtype!=1 && iotMode==1){ // in MQTT and not in config mode     
-          mqttClient.setBrokerDomain((char*) mqttServer.c_str());
-          mqttClient.setPort(1883);
+          //mqttClient.setBrokerDomain((char*) mqttServer.c_str());
+          //mqttClient.setPort(1883);
+          mqttClient.setServer(mqttServer.c_str(),1883);
           mqttClient.setCallback(mqtt_arrived);
           mqttClient.setClient(wifiClient);
           if (WiFi.status() == WL_CONNECTED){
