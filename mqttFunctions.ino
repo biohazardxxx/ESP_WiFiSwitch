@@ -7,8 +7,12 @@ boolean connectMQTT(){
   Serial.print(mqttServer);
   Serial.print(" as ");
   Serial.println(host);
+  Serial.print(" with ");
+  Serial.print(mqttUser);
+  Serial.print(" / ");
+  Serial.println(mqttPassword);
   
-  if (mqttClient.connect(host)) {
+  if (mqttClient.connect(host, mqttu, mqttp)) {
     Serial.println("Connected to MQTT broker");
     if(mqttClient.subscribe((char*)subTopic.c_str())){
       Serial.println("Subsribed to topic.");
@@ -29,7 +33,7 @@ void disconnectMQTT(){
 
 void mqtt_handler(){
   if (toPub==1){
-    Debugln("DEBUG: Publishing state via MWTT");
+    Debugln("DEBUG: Publishing state via MQTT");
     if(pubState()){
      toPub=0; 
     }

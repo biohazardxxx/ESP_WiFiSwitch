@@ -68,7 +68,7 @@ int iotMode=0; //IOT mode: 0 = Web control, 1 = MQTT (No const since it can chan
 MDNSResponder mdns;
 ESP8266WebServer server(80);
 WiFiClient wifiClient;
-PubSubClient mqttClient;
+PubSubClient mqttClient(wifiClient);
 Ticker btn_timer;
 Ticker otaTickLoop;
 
@@ -80,7 +80,7 @@ int otaFlag=0;
 boolean inApMode=0;
 //##### Global vars ##### 
 int webtypeGlob;
-int otaCount=300; //imeout in sec for OTA mode
+int otaCount=100; //imeout in sec for OTA mode
 int current; //Current state of the button
 unsigned long count = 0; //Button press time counter
 String st; //WiFi Stations HTML list
@@ -93,6 +93,8 @@ String epass = "";
 String pubTopic;
 String subTopic;
 String mqttServer = "";
+String mqttUser = "";
+String mqttPassword = "";
 const char* otaServerIndex = "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>";
 
 //-------------- void's -------------------------------------------------------------------------------------

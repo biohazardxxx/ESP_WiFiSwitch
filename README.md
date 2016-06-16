@@ -60,8 +60,7 @@ Open the modules page after entering config mode (Press button >20secs if you wa
 For several snippets used the credit goes to:
  - https://github.com/esp8266
  - https://github.com/chriscook8/esp-arduino-apboot
- - https://github.com/knolleary/pubsubclient
- - https://github.com/vicatcu/pubsubclient <- Currently this needs to be used instead of the origin
+ - https://github.com/knolleary/pubsubclient (v.2.6.0)
  - https://gist.github.com/igrr/7f7e7973366fc01d6393
  - http://www.esp8266.com/viewforum.php?f=25
  - http://www.esp8266.com/viewtopic.php?f=29&t=2745

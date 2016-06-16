@@ -198,6 +198,8 @@ void webHandleConfig(){
   s += "The following is not ready yet!</br>";
   s += "<label>IOT mode: </label><input type='radio' name='iot' value='0'> HTTP<input type='radio' name='iot' value='1' checked> MQTT</br>";
   s += "<label>MQTT Broker IP/DNS: </label><input name='host' length=15></br>";
+  s += "<label>MQTT Username: </label><input name='mqttuser' length=15></br>";
+  s += "<label>MQTT Password: </label><input name='mqttpass' length=15></br>";
   s += "<label>MQTT Publish topic: </label><input name='pubtop' length=64></br>";
   s += "<label>MQTT Subscribe topic: </label><input name='subtop' length=64></br>";
   s += "<input type='submit'></form></p>";

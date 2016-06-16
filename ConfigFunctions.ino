@@ -34,6 +34,8 @@ bool loadConfig() {
   String pubTopicC = json["pubTopic"];
   String subTopicC = json["subTopic"];
   String mqttServerC = json["mqttServer"];
+  String mqttUserC = json["mqttUser"];
+  String mqttPasswordC = json["mqttPassword"];
 
   // Real world application would store these values in some variables for
   // later use.
@@ -58,6 +60,10 @@ bool loadConfig() {
   Serial.println(subTopic);
   Serial.print("mqttServer: ");
   Serial.println(mqttServer);
+  Serial.print("mqttUser: ");
+  Serial.println(mqttUser);
+  Serial.print("mqttPassword: ");
+  Serial.println(mqttPassword);
   Serial.print("esid: ");
   Serial.println(esid);
   return true;
@@ -73,6 +79,8 @@ bool saveConfig() {
   json["pubTopic"] = pubTopic;
   json["subTopic"] = subTopic;
   json["mqttServer"] = mqttServer;
+  json["mqttUser"] = mqttUser;
+  json["mqttPassword"] = mqttPassword;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
