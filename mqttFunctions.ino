@@ -12,7 +12,7 @@ boolean connectMQTT(){
   Serial.print(" / ");
   Serial.println(mqttPassword);
   
-  if (mqttClient.connect(host, mqttUser, mqttPassword)) {
+  if (mqttClient.connect(host, mqttu, mqttp)) {
     Serial.println("Connected to MQTT broker");
     if(mqttClient.subscribe((char*)subTopic.c_str())){
       Serial.println("Subsribed to topic.");
